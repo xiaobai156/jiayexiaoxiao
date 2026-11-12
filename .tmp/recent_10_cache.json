@@ -5,9 +5,9 @@
     "316期"
   ],
   "period_count": 1,
-  "updated_at": "2026-11-12T17:39:58",
-  "sites_count": 86,
-  "rules_fingerprint": "42fc65e28dfc07eef90b18189268506691c65bdd23466b843f7ec49464406154",
+  "updated_at": "2026-11-12T17:46:39",
+  "sites_count": 87,
+  "rules_fingerprint": "0c7b7f958cd94ce011eeb7425fa5eb0276a136fcdbb94c8ccd780ea221461a5f",
   "sites": [
     {
       "identity": {
@@ -626,7 +626,7 @@
           "api_url": "",
           "title": "",
           "author": "",
-          "raw_line": "316期家野必中【家禽】开：00 准 无错10码 飞龙在天 四季中特 频果报 一码一肖 天空彩票 ⒌码中特",
+          "raw_line": "316期家野必中【家禽】开：00 准 四季中特 频果报 单双中特 澳门马票 10码中特 澳门神庙 ⒌码中特",
           "document_order": 0,
           "block_order": 4,
           "record_order": 4,
@@ -3012,6 +3012,41 @@
           "record_order": 0,
           "source_block_id": "browser:351542",
           "source_identity": "topic:351542",
+          "source_user_id": "",
+          "source_forum_id": "",
+          "source_list_position": -1
+        }
+      },
+      "missing": {}
+    },
+    {
+      "identity": {
+        "section": "敦煌流年",
+        "url": "https://rmrcjqk.6ln2t-46k8t-kuthoe.xyz:16677/topic/267376.html",
+        "position": "top",
+        "parse_hint": "jiaye_block"
+      },
+      "values": {
+        "316期": "家"
+      },
+      "positions": {
+        "316期": 0
+      },
+      "provenance": {
+        "316期": {
+          "record_id": "267376",
+          "record_path": "/topic/267376.html",
+          "route": "browser_page",
+          "source_url": "https://rmrcjqk.6ln2t-46k8t-kuthoe.xyz:16677/topic/267376.html",
+          "api_url": "",
+          "title": "",
+          "author": "",
+          "raw_line": "316期:【家野☆中特】【家禽】开:0000准",
+          "document_order": 0,
+          "block_order": 0,
+          "record_order": 0,
+          "source_block_id": "browser:267376",
+          "source_identity": "topic:267376",
           "source_user_id": "",
           "source_forum_id": "",
           "source_list_position": -1
