@@ -32,7 +32,9 @@ class BrowserService:
         # The executor is intentionally a single browser lane.  Queueing for
         # that lane is not page-render time; only the running render gets the
         # caller's timeout.
-        self._slots.acquire()
+        # 排队等待不算单站渲染预算，但必须有上限，否则一次卡死会让整轮永久阻塞。
+        if not self._slots.acquire(timeout=max(120.0, timeout * 3)):
+            raise RequestFailure("浏览器渲染排队超时：前一个渲染仍未结束", retryable=True)
         try:
             future = self._executor.submit(self._render, url, max(0.1, timeout), insecure)
         except BaseException:
@@ -158,7 +160,8 @@ class BrowserService:
             self._executor.submit(self._close_worker_browser).result(timeout=10.0)
         except Exception:
             pass
-        self._executor.shutdown(wait=True, cancel_futures=True)
+        # 卡死的渲染无法被 cancel，等待会让进程无法退出；不等待，直接放弃该线程。
+        self._executor.shutdown(wait=False, cancel_futures=True)
 
 
 def _request_resource_type(request: Any) -> str:

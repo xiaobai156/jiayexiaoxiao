@@ -38,8 +38,8 @@ def write_multi_period_outputs(
 ) -> tuple[Path, Path, Path]:
     label = output_label(periods)
     json_path = TMP_DIR / f"multi_period_any_{label}.json"
-    success_path = SUMMARY_DIR / f"{label}多期抓取成功-一头.txt"
-    failed_path = FAILURE_SUMMARY_DIR / f"{label}多期汇总失败-一头.txt"
+    success_path = SUMMARY_DIR / f"{label}多期抓取成功-家野.txt"
+    failed_path = FAILURE_SUMMARY_DIR / f"{label}多期汇总失败-家野.txt"
     success_lines = ["名称 字段 命中期数 数据 网站"]
     success_lines.extend(
         f"{record.section} {record.field} {record.period} {record.value} {record.url}"

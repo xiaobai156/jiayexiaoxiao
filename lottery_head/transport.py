@@ -98,8 +98,8 @@ def resolve_real_ips(host: str) -> list[str]:
 class _SniConnection(http.client.HTTPSConnection):
     """连接真实 IP，但用原域名做 SNI 和 Host（证书仍按域名严格校验）。"""
 
-    def __init__(self, host: str, ip: str, timeout: float) -> None:
-        super().__init__(host, timeout=timeout)
+    def __init__(self, host: str, port: int, ip: str, timeout: float) -> None:
+        super().__init__(host, port=port, timeout=timeout)
         self._ip = ip
 
     def connect(self) -> None:
@@ -133,9 +133,13 @@ def fetch_via_real_ip(url: str, timeout: float = 20.0, depth: int = 0) -> Respon
     path = parsed.path or "/"
     if parsed.query:
         path = f"{path}?{parsed.query}"
+    try:
+        port = parsed.port or 443
+    except ValueError as exc:
+        raise RequestFailure(f"真实IP回退端口非法：{url}", retryable=False) from exc
     last_error: Exception | None = None
     for ip in ips[:2]:
-        connection = _SniConnection(host, ip, timeout)
+        connection = _SniConnection(host, port, ip, timeout)
         try:
             connection.request(
                 "GET",

@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     target_period = parse_target_period(argv[0])
     period_number = _period_number(target_period)
-    failure_path = FAILURE_SUMMARY_DIR / f"{period_number}期失败-一头.txt"
+    failure_path = FAILURE_SUMMARY_DIR / f"{period_number}期失败-家野.txt"
     if not failure_path.exists():
         print(f"失败TXT不存在：{failure_path}")
         return 2
@@ -76,8 +76,8 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError:
         print(f"目标期数{target_period}不在缓存窗口，三份文件保持原样")
         return 1
-    success_path = SUMMARY_DIR / f"{period_number}期-头.txt"
-    failed_path = FAILURE_SUMMARY_DIR / f"{period_number}期失败-一头.txt"
+    success_path = SUMMARY_DIR / f"{period_number}期-家野.txt"
+    failed_path = FAILURE_SUMMARY_DIR / f"{period_number}期失败-家野.txt"
     expected = {success_path: success_path.read_bytes() if success_path.exists() else None, failure_path: failure_original}
     expected[RECENT_10_CACHE_PATH] = cache_original
     try:

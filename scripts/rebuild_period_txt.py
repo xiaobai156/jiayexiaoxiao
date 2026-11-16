@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """从近10期缓存重建指定期的成功 TXT（不联网、不抓取）。身份按规范化 identity 匹配。"""
 from __future__ import annotations
+
+import os
 import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from lottery_head.cache_payload import _identity_payload
 from lottery_head.cache_validation import read_validated_cache
@@ -14,10 +16,22 @@ from lottery_head.models import HeadRecord
 from lottery_head.output_text import format_success_txt
 from lottery_head.settings import RECENT_10_CACHE_PATH, SUMMARY_DIR
 
-PERIOD = sys.argv[1] if len(sys.argv) > 1 else "303期"
+USAGE = "用法：python scripts/rebuild_period_txt.py {期数}期 [--yes]"
+
+if len(sys.argv) < 2:
+    print(USAGE)
+    raise SystemExit(2)
+PERIOD = sys.argv[1].strip()
+if not PERIOD:
+    print(USAGE)
+    raise SystemExit(2)
+CONFIRM = "--yes" in sys.argv[2:]
+
 rules = load_rules()
 snap = read_validated_cache(RECENT_10_CACHE_PATH, rules)
-assert PERIOD in snap["periods"], f"{PERIOD} 不在缓存窗口 {snap['periods']}"
+if PERIOD not in snap["periods"]:
+    print(f"停止：{PERIOD} 不在缓存窗口 {snap['periods']}")
+    raise SystemExit(2)
 
 
 def key_of(identity: dict) -> tuple:
@@ -62,19 +76,45 @@ for rule in rules:
     )
 
 text = format_success_txt(records, PERIOD)
-out = Path(SUMMARY_DIR) / f"{PERIOD}-头.txt"
-out.write_text(text, encoding="utf-8")
 
+# 先把表头和排行核完，任何时候都不允许"写坏了再发现"。
 lines = text.splitlines()
-mi = next(i for i, l in enumerate(lines) if l.startswith("内容\t次数\t排名"))
-st = [l for l in lines[:mi] if l.strip()]
-vals = [l.split(" ")[0] for l in st]
+markers = [i for i, line in enumerate(lines) if line.startswith("内容\t次数\t排名")]
+if len(markers) != 1:
+    print(f"停止：生成的 TXT 排行表头异常（命中 {len(markers)} 处），未写任何文件")
+    raise SystemExit(1)
+mi = markers[0]
+station_lines = [line for line in lines[:mi] if line.strip()]
+values = [line.split(" ")[0] for line in station_lines]
 rank = {r.split("\t")[0]: int(r.split("\t")[1]) for r in lines[mi + 1:] if r.strip()}
+if dict(Counter(values)) != rank:
+    print("停止：站点值与排行统计不一致，未写任何文件")
+    raise SystemExit(1)
+
+out = Path(SUMMARY_DIR) / f"{PERIOD}-家野.txt"
+before = out.read_bytes() if out.exists() else None
+payload = text.encode("utf-8")
+if before != payload:
+    old_lines = set(before.decode("utf-8-sig", "ignore").splitlines()) if before else set()
+    new_lines = set(text.splitlines())
+    added = len(new_lines - old_lines)
+    removed = len(old_lines - new_lines)
+    print(f"预览：{out}")
+    print(f"  现有 {len(old_lines)} 行 → 新 {len(new_lines)} 行（+{added} / -{removed}），站点行 {len(station_lines)} 条")
+    print(f"  排行 {rank} | 合计 {sum(rank.values())}")
+    if not CONFIRM:
+        print("未写入。确认覆盖请加 --yes 重跑。")
+        raise SystemExit(1)
+
+if before != payload:
+    tmp = out.with_name(f".{out.name}.tmp")
+    tmp.write_bytes(payload)
+    os.replace(tmp, out)
+
 print(f"缓存 {len(snap['sites'])} 站 | {PERIOD} 取值 {len(records)} 站")
 print(f"未匹配 {len(unmatched)}: {unmatched}")
 print(f"该期无值 {len(no_value)}: {no_value}")
-print(f"写出: {out}")
-print(f"  {out.stat().st_size}B | 站点行 {len(st)}")
-print("排行:", rank, "| 合计", sum(rank.values()), "| 逐项一致", dict(Counter(vals)) == rank)
-print("首3行:", st[:3])
-print("末3行:", st[-3:])
+print(f"写出: {out} | {out.stat().st_size}B | 站点行 {len(station_lines)}")
+print(f"排行: {rank} | 合计 {sum(rank.values())} | 逐项一致 True")
+print("首3行:", station_lines[:3])
+print("末3行:", station_lines[-3:])

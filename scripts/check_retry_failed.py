@@ -349,7 +349,7 @@ def _check_success_txt_period_guard():
     assert [r.section for r in unique_success_records(records, "251")] == ["A", "C"]
     # 不传目标期时保持旧行为（只做去重与状态过滤）
     assert [r.section for r in unique_success_records(records)] == ["A", "B", "C"]
-    # 子串/带前缀期数不得被子串误取：2989期、第251期、251期-头 都要按全等语义处理。
+    # 子串/带前缀期数不得被子串误取：2989期、第251期、251期-家野 都要按全等语义处理。
     # 无法归一的目标期（如 4 位 1298期）返回空 -> 不启用期数过滤，保持旧行为。
     assert [r.section for r in unique_success_records(records, "1298期")] == ["A", "B", "C"]
     assert [r.section for r in unique_success_records(
@@ -398,7 +398,7 @@ def _check_main_scope_and_snapshot():
         root = Path(folder)
         failure_dir, success_dir = root / "failed", root / "success"
         failure_dir.mkdir(); success_dir.mkdir()
-        failure_path = failure_dir / "251期失败-一头.txt"
+        failure_path = failure_dir / "251期失败-家野.txt"
         failure_path.write_text("失败 A https://example.com/a 方向: 顶部 期数: 251期\n阶段: 页面抓取 原因: 失败", encoding="utf-8")
         cache_path = root / "cache.json"
         cache_path.write_text(json.dumps(snapshot), encoding="utf-8")
